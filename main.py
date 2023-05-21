@@ -10,7 +10,14 @@ import copy
 
 CONCERT_PITCH = 440
 ALL_NOTES = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
-
+BASIC_NOTES_AND_PITCHES = {
+    "E4": 329.64,
+    "B3": 246.94,
+    "G3": 196,
+    "D3": 146.83,
+    "A2": 110,
+    "E2": 82.41,
+}
 
 def find_closest_note(pitch):
     i = int(np.round(np.log2(pitch/CONCERT_PITCH)*12))
@@ -50,11 +57,16 @@ def plot_signal_time():
     plt.show()
 
 
+SELECTION = "G3"
+
+
 def callback(indata, frames, time, status):
     if not hasattr(callback, "window_samples"):
         callback.window_samples = [0 for _ in range(WINDOW_SIZE)]
     if not hasattr(callback, "noteBuffer"):
         callback.noteBuffer = ["1", "2"]
+    if not hasattr(callback, "selection"):
+        callback.selection_pitch = BASIC_NOTES_AND_PITCHES[SELECTION]
 
     if status:
         print(status)
@@ -118,6 +130,12 @@ def callback(indata, frames, time, status):
         os.system('cls' if os.name == 'nt' else 'clear')
         if callback.noteBuffer.count(callback.noteBuffer[0]) == len(callback.noteBuffer):
             print(f"Closest note: {closest_note} {max_freq}/{closest_pitch}")
+            if callback.selection_pitch - 1 <= max_freq <= callback.selection_pitch + 1:
+                print("Tuned")
+            elif max_freq < callback.selection_pitch:
+                print("Tune Up")
+            elif max_freq > callback.selection_pitch:
+                print("Tune Down")
         else:
             print(f"Closest note: ...")
 
@@ -159,12 +177,14 @@ windowSamples = [0 for _ in range(WINDOW_SIZE)]
 
 if __name__ == '__main__':
     # print(find_closest_note(1000))
-    print(sd.default.device)
 
-    recording = record_audio_and_save(SAMPLE_DUR, SAMPLE_FREQ)
-
-    plot_signal_time()
-    plot_dft()
+    # Test and visualize the recording of a note
+    # print(sd.default.device)
+    #
+    # recording = record_audio_and_save(SAMPLE_DUR, SAMPLE_FREQ)
+    #
+    # plot_signal_time()
+    # plot_dft()
 
     # Start the microphone input stream
     try:
